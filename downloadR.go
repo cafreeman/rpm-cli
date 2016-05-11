@@ -38,14 +38,14 @@ func createDownloadPath(rootPath, fileName string) string {
 
 // Create install directory recursively, then create the installer file itself
 func createInstallDirectory(path *string) {
-	err := os.MkdirAll(filepath.Dir(*path), 0666)
+	err := os.MkdirAll(filepath.Dir(*path), 0755)
 	errCheck(err)
 }
 
 func downloadInstaller(url *string, installerPath *string) {
 	response, err := http.Get(*url)
 	errCheck(err)
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		msg := fmt.Sprintf(`There was an issue downloading the installer from %s
       The URL returned the following response:
       %v`,
@@ -65,6 +65,7 @@ func saveInstaller(response *http.Response, installerPath *string, bar *pb.Progr
 	bar.Start()
 
 	installerFile, err := os.Create(*installerPath)
+	defer installerFile.Close()
 	errCheck(err)
 
 	// Create multi-writer for output destination and progress bar
@@ -85,6 +86,7 @@ func createProgressBar(response *http.Response) *pb.ProgressBar {
 	// Create progress bar
 	bar := pb.New(int(responseSize)).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
 	bar.ShowSpeed = true
+	bar.ShowTimeLeft = true
 	bar.SetWidth(120)
 
 	return bar
