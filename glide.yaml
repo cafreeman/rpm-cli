@@ -2,4 +2,4 @@ package: github.com/cafreeman/rpm-cli
 import:
 - package: github.com/cheggaaa/pb
 - package: github.com/gocarina/gocsv
-- package: github.com/codegangsta/cli
+- package: github.com/urfave/cli
