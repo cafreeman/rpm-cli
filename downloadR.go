@@ -42,23 +42,49 @@ func createInstallDirectory(path *string) {
 	errCheck(err)
 }
 
-func downloadInstaller(url *string, installerPath *string) {
-	response, err := http.Get(*url)
+func createURLs(version *string) []string {
+	currentVersionURL := fmt.Sprintf("https://cran.rstudio.com/bin/windows/base/R-%v-win.exe", *version)
+	oldVersionURL := fmt.Sprintf("https://cran.rstudio.com/bin/windows/base/old/%[1]v/R-%[1]v-win.exe", *version)
+	return []string{currentVersionURL, oldVersionURL}
+}
+
+// Returns the URL from a successful download
+func downloadInstaller(version *string, installerPath *string) string {
+	urls := createURLs(version)
+
+	url := urls[0]
+
+	// Attempt to download using currentVersionURL first
+	response, err := http.Get(url)
 	errCheck(err)
+	// If the server returns an error status, optimistically assume we're just looking for an old
+	// version and attempt to download using the oldVersionURL
 	if response.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf(`There was an issue downloading the installer from %s
-      The URL returned the following response:
-      %v`,
-			*url,
-			response.Status,
-		)
-		log.Fatal(msg)
+		fmt.Printf("No installer found at %s.\n"+
+			"You might be attempting to download an older version of R.\n"+
+			"Attempting to download from past releases.\n\n", url)
+		// Download from oldVersionURL
+		url = urls[1]
+		response, err = http.Get(url)
+		errCheck(err)
+		// If the second download attempt fails, assume something else is wrong and exit
+		if response.StatusCode != http.StatusOK {
+			msg := fmt.Sprintf("There was an issue downloading the installer from %s\n"+
+				"The URL returned the following response:\n"+
+				"%v",
+				url,
+				response.Status,
+			)
+			log.Fatal(msg)
+		}
 	}
 
 	defer response.Body.Close()
 	bar := createProgressBar(response)
 
 	saveInstaller(response, installerPath, bar)
+
+	return url
 }
 
 func saveInstaller(response *http.Response, installerPath *string, bar *pb.ProgressBar) string {
@@ -87,7 +113,7 @@ func createProgressBar(response *http.Response) *pb.ProgressBar {
 	bar := pb.New(int(responseSize)).SetUnits(pb.U_BYTES).SetRefreshRate(time.Millisecond * 10)
 	bar.ShowSpeed = true
 	bar.ShowTimeLeft = true
-	bar.SetWidth(120)
+	// bar.SetWidth(120)
 
 	return bar
 }

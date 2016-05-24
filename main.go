@@ -52,7 +52,7 @@ func main() {
 				url := fmt.Sprintf("https://cran.rstudio.com/bin/windows/base/R-%v-win.exe", version)
 
 				// Pull the file name out of the URL to use when creating the file
-				fileName := getFileName(url)
+				fileName := fmt.Sprintf("R-%v-win.exe", version)
 
 				// Check if the installer has already been downloaded
 				isDownloaded, installerPath := checkInstaller(rootPath, fileName)
@@ -61,7 +61,7 @@ func main() {
 				if isDownloaded != true {
 					createInstallDirectory(&installerPath)
 
-					downloadInstaller(&url, &installerPath)
+					downloadInstaller(&version, &installerPath)
 
 					fmt.Printf("Successfully downloaded %s. The installer is located at %s.\n", fileName, installerPath)
 				} else {
