@@ -12,6 +12,7 @@ import (
 var (
 	version            string
 	installDestination string
+	manifestPath       string
 )
 
 func main() {
@@ -38,6 +39,12 @@ func main() {
 					Usage:       "The destination directory for your R install",
 					Destination: &installDestination,
 				},
+				cli.StringFlag{
+					Name:        "manifest, m",
+					Value:       "",
+					Usage:       "The path to your package manifest (packages.csv)",
+					Destination: &manifestPath,
+				},
 			},
 			Action: func(c *cli.Context) error {
 				if version == "" {
@@ -46,10 +53,17 @@ func main() {
 				if installDestination == "" {
 					log.Fatal("You must provide a directory path for the R install. Use the --destination flag. Type `rpm-cli help` for more information.")
 				}
-				rootPath, _ := os.Getwd()
+				if manifestPath == "" {
+					log.Fatal("You must provide a file path to your package manifest. Use --manifest flag. Type `rpm-cli help` for more informaton.")
+				}
+				// Read package manifest first, so we can error out if the file path is invalid
+				// manifest := readManifest(filepath.Join(rootPath, "packages.csv"))
+				manifest := readManifest(filepath.Join(manifestPath))
+				cranPackages := manifest.extractCRANPackages()
+				repoURL := "https://cran.rstudio.com"
 
-				// Create the download URL for the specific version of R
-				url := fmt.Sprintf("https://cran.rstudio.com/bin/windows/base/R-%v-win.exe", version)
+				// Get current working directory
+				rootPath, _ := os.Getwd()
 
 				// Pull the file name out of the URL to use when creating the file
 				fileName := fmt.Sprintf("R-%v-win.exe", version)
@@ -69,11 +83,6 @@ func main() {
 				}
 
 				rInstall := installR(installerPath, filepath.Join(rootPath, installDestination))
-
-				manifest := readManifest(filepath.Join(rootPath, "packages.csv"))
-				cranPackages := manifest.extractCRANPackages()
-
-				repoURL := "https://cran.rstudio.com"
 
 				// sampleList := cranPackages[:4]
 
