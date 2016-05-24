@@ -14,7 +14,7 @@ func installR(installerFile, installPath string) string {
 	cmd := exec.Command(installerFile, "/SILENT", fmt.Sprintf(`/DIR=%v`, installPath))
 	err := cmd.Run()
 	if err == nil {
-		fmt.Println("Install completed. Cleaning up installer file.\n")
+		fmt.Printf("Install completed. Cleaning up installer file.\n\n")
 		err := os.Remove(installerFile)
 		errCheck(err)
 	} else {

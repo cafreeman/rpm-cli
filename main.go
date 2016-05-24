@@ -79,7 +79,7 @@ func main() {
 
 					fmt.Printf("Successfully downloaded %s. The installer is located at %s.\n", fileName, installerPath)
 				} else {
-					fmt.Println(fileName, "has already been downloaded. Skipping to install step\n")
+					fmt.Printf("%s has already been downloaded. Skipping to install step\n\n", fileName)
 				}
 
 				rInstall := installR(installerPath, filepath.Join(rootPath, installDestination))

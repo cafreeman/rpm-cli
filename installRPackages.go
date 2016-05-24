@@ -16,9 +16,9 @@ func installRPackages(rPath string, packageList *[]string, repoURL string) {
 		installCmd := exec.Command(rScriptPath, "-e", installCmdString)
 		out, err := installCmd.Output()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("%s\n\n", err)
 		} else {
-			fmt.Println(string(out), "\n")
+			fmt.Printf("%s\n\n", string(out))
 		}
 	}
 }
