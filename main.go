@@ -57,9 +57,9 @@ func main() {
 					log.Fatal("You must provide a file path to your package manifest. Use --manifest flag. Type `rpm-cli help` for more informaton.")
 				}
 				// Read package manifest first, so we can error out if the file path is invalid
-				// manifest := readManifest(filepath.Join(rootPath, "packages.csv"))
 				manifest := readManifest(filepath.Join(manifestPath))
 				cranPackages := manifest.extractCRANPackages()
+
 				repoURL := "https://cran.rstudio.com"
 
 				// Get current working directory
@@ -82,12 +82,11 @@ func main() {
 					fmt.Printf("%s has already been downloaded. Skipping to install step\n\n", fileName)
 				}
 
+				// Run the R installer and return the install path
 				rInstall := installR(installerPath, filepath.Join(rootPath, installDestination))
 
-				// sampleList := cranPackages[:4]
-
-				// installRPackages(rInstall, &sampleList, repoURL)
 				installRPackages(rInstall, &cranPackages, repoURL)
+
 				return nil
 			},
 		},
